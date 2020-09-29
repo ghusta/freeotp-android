@@ -26,7 +26,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TokenPersistenceTest {
+public class TokenPersistenceTest
+{
     @Mock
     Context mockContext;
 
@@ -41,11 +42,12 @@ public class TokenPersistenceTest {
     private Token mockToken;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         when(mockContext.getApplicationContext())
-            .thenReturn(mockApplicationContext);
+                .thenReturn(mockApplicationContext);
         when(mockApplicationContext.getSharedPreferences(anyString(), anyInt()))
-            .thenReturn(mockSharedPreferences);
+                .thenReturn(mockSharedPreferences);
         tokenPersistence = new TokenPersistence(mockContext);
         mockToken = mockToken("totp", null);
 
@@ -54,47 +56,58 @@ public class TokenPersistenceTest {
         final SharedPreferences.Editor mockEditor = Mockito.mock(SharedPreferences.Editor.class);
         when(mockSharedPreferences.edit()).thenReturn(mockEditor);
         when(mockEditor.putString(anyString(), anyString()))
-            .thenAnswer(new Answer<SharedPreferences.Editor>() {
-            @Override
-            public SharedPreferences.Editor answer(InvocationOnMock invocation) throws Throwable {
-                mockStore.put(invocation.getArgumentAt(0, String.class),
-                              invocation.getArgumentAt(1, String.class));
-                return mockEditor;
-            }
-        });
+                .thenAnswer(new Answer<SharedPreferences.Editor>()
+                {
+                    @Override
+                    public SharedPreferences.Editor answer(InvocationOnMock invocation) throws Throwable
+                    {
+                        mockStore.put(invocation.getArgumentAt(0, String.class),
+                                invocation.getArgumentAt(1, String.class));
+                        return mockEditor;
+                    }
+                });
         when(mockEditor.remove(anyString()))
-            .thenAnswer(new Answer<SharedPreferences.Editor>() {
-            @Override
-            public SharedPreferences.Editor answer(InvocationOnMock invocation) throws Throwable {
-                mockStore.remove(invocation.getArgumentAt(0, String.class));
-                return mockEditor;
-            }
-        });
+                .thenAnswer(new Answer<SharedPreferences.Editor>()
+                {
+                    @Override
+                    public SharedPreferences.Editor answer(InvocationOnMock invocation) throws Throwable
+                    {
+                        mockStore.remove(invocation.getArgumentAt(0, String.class));
+                        return mockEditor;
+                    }
+                });
 
         when(mockSharedPreferences.contains(anyString()))
-            .thenAnswer(new Answer<Boolean>() {
-            @Override
-            public Boolean answer(InvocationOnMock invocation) throws Throwable {
-                return mockStore.containsKey(invocation.getArgumentAt(0, String.class));
-            }
-        });
+                .thenAnswer(new Answer<Boolean>()
+                {
+                    @Override
+                    public Boolean answer(InvocationOnMock invocation) throws Throwable
+                    {
+                        return mockStore.containsKey(invocation.getArgumentAt(0, String.class));
+                    }
+                });
 
         when(mockSharedPreferences.getString(anyString(), any(String.class)))
-            .thenAnswer(new Answer<String>() {
-            @Override
-            public String answer(InvocationOnMock invocation) throws Throwable {
-                try {
-                    return mockStore.getOrDefault(invocation.getArgumentAt(0, String.class),
-                                                  invocation.getArgumentAt(1, String.class));
-                } catch (NullPointerException np) {
-                    return mockStore.getOrDefault(invocation.getArgumentAt(0, String.class), null);
-                }
-            }
-        });
+                .thenAnswer(new Answer<String>()
+                {
+                    @Override
+                    public String answer(InvocationOnMock invocation) throws Throwable
+                    {
+                        try
+                        {
+                            return mockStore.getOrDefault(invocation.getArgumentAt(0, String.class),
+                                    invocation.getArgumentAt(1, String.class));
+                        } catch (NullPointerException np)
+                        {
+                            return mockStore.getOrDefault(invocation.getArgumentAt(0, String.class), null);
+                        }
+                    }
+                });
     }
 
     @Test
-    public void add_sameTokenTwice_isIdempotent() throws Exception {
+    public void add_sameTokenTwice_isIdempotent() throws Exception
+    {
         int sizeBefore = mockStore.size();
         tokenPersistence.save(mockToken);
         assertEquals(sizeBefore + 2, mockStore.size());
@@ -105,18 +118,18 @@ public class TokenPersistenceTest {
         token.addProperty("label", "joe@google.com");
         token.addProperty("type", "TOTP");
         token.addProperty("algo", "SHA1");
-        token.add("secret", new JsonParser().parse("[72,101,108,108,111,33,-34,-83,-66,-17]"));
+        token.add("secret", JsonParser.parseString("[72,101,108,108,111,33,-34,-83,-66,-17]"));
         token.addProperty("digits", 6);
         token.addProperty("counter", 0);
         token.addProperty("period", 30);
 
         // language=JSON
-        assertEquals(token, new JsonParser().parse(mockStore.get("FreeOTP:joe@google.com")));
+        assertEquals(token, JsonParser.parseString(mockStore.get("FreeOTP:joe@google.com")));
 
         // language=JSON
         JsonArray order = new JsonArray();
         order.add("FreeOTP:joe@google.com");
-        assertEquals(order, new JsonParser().parse(mockStore.get("tokenOrder")));
+        assertEquals(order, JsonParser.parseString(mockStore.get("tokenOrder")));
 
         sizeBefore = mockStore.size();
         tokenPersistence.save(mockToken);
@@ -124,7 +137,8 @@ public class TokenPersistenceTest {
     }
 
     @Test
-    public void length_ofStoreWith1Token_returns1() throws Exception {
+    public void length_ofStoreWith1Token_returns1() throws Exception
+    {
         int sizeBefore = mockStore.size();
         tokenPersistence.save(mockToken);
         assertEquals(sizeBefore + 2, mockStore.size());
@@ -133,7 +147,8 @@ public class TokenPersistenceTest {
     }
 
     @Test
-    public void get_WithValidPosition_returnsToken() throws Exception {
+    public void get_WithValidPosition_returnsToken() throws Exception
+    {
         tokenPersistence.save(mockToken);
         Token hotpMockToken = mockToken("hotp", "1", "FreeOTP:mail@google.com");
         tokenPersistence.save(hotpMockToken);
@@ -154,12 +169,14 @@ public class TokenPersistenceTest {
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void get_WithInvalidPosition_ThrowsIndexOutOfBounds() throws Exception {
+    public void get_WithInvalidPosition_ThrowsIndexOutOfBounds() throws Exception
+    {
         tokenPersistence.get(0);
     }
 
     @Test
-    public void move_fromSamePosition_DoesNothing() throws Exception {
+    public void move_fromSamePosition_DoesNothing() throws Exception
+    {
         tokenPersistence.save(mockToken);
         Token hotpMockToken = mockToken("hotp", "1", "FreeOTP:mail@google.com");
         tokenPersistence.save(hotpMockToken);
@@ -170,7 +187,8 @@ public class TokenPersistenceTest {
     }
 
     @Test
-    public void move_twoValidTokens_SwitchesTokenOrder() throws Exception {
+    public void move_twoValidTokens_SwitchesTokenOrder() throws Exception
+    {
         tokenPersistence.save(mockToken);
         Token hotpMockToken = mockToken("hotp", "1", "FreeOTP:mail@google.com");
         tokenPersistence.save(hotpMockToken);
@@ -184,7 +202,8 @@ public class TokenPersistenceTest {
     }
 
     @Test
-    public void delete_tokenFromValidPosition_removesIt() throws Exception {
+    public void delete_tokenFromValidPosition_removesIt() throws Exception
+    {
         tokenPersistence.save(mockToken);
         Token hotpMockToken = mockToken("hotp", "1", "FreeOTP:mail@google.com");
         tokenPersistence.save(hotpMockToken);
@@ -198,7 +217,8 @@ public class TokenPersistenceTest {
     }
 
     @Test
-    public void save_updatingExistingToken_changesCounter() throws Exception {
+    public void save_updatingExistingToken_changesCounter() throws Exception
+    {
         Token hotpMockToken = mockToken("hotp", "1", "FreeOTP:mail@google.com");
         tokenPersistence.save(hotpMockToken);
 
