@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/freeotp/freeotp-android.svg?branch=master)](https://travis-ci.org/freeotp/freeotp-android)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ghusta/freeotp-android/Android%20CI?label=GitHub%20Actions&style=for-the-badge)
 
 # FreeOTP
 
